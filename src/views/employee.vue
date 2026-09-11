@@ -4,6 +4,9 @@
     <h2 class="mb-3">รายชื่อลูกค้า</h2>
     
     <!-- ตารางแสดงข้อมูลลูกค้า -->
+    <div class="text-end mb-3">
+    <a href="/AE" class="btn btn-primary">Add+</a>
+    </div>
     <table class="table table-bordered table-striped">
       <thead class="table-dark">
         <tr>
