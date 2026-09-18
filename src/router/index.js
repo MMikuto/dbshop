@@ -26,6 +26,12 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/employee.vue')
   },
   {
+    path: '/contacts',
+    name: 'contacts',
+   
+    component: () => import(/* webpackChunkName: "about" */ '../views/contacts.vue')
+  },
+  {
     path: '/add',
     name: 'AddCustomers',
    
@@ -36,7 +42,13 @@ const routes = [
     name: 'AddEmployee',
    
     component: () => import(/* webpackChunkName: "about" */ '../views/AddEmployee.vue')
-  }
+  },
+  {
+    path: '/AC',
+    name: 'AddContacts',
+   
+    component: () => import(/* webpackChunkName: "about" */ '../views/Addcontacts.vue')
+  },
 ]
 
 const router = createRouter({

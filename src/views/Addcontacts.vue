@@ -1,21 +1,15 @@
 <template>
   <div class="container mt-4 col-md-4 bg-body-secondary ">
-    <h2 class="text-center mb-3">ลงทะเบียน</h2>
+    <h2 class="text-center mb-3">เพิ่มข้อมูล Contact</h2>
     <form @submit.prevent="addData">
       <div class="mb-2">
-        <input v-model="customer.firstName" class="form-control" placeholder="ชื่อ" required />
+        <input v-model="contact.subject" class="form-control" placeholder="หัวข้อ" required />
       </div>
       <div class="mb-2">
-        <input v-model="customer.lastName" class="form-control" placeholder="นามสกุล" required />
+        <textarea v-model="contact.detail" class="form-control" placeholder="รายละเอียด" rows="4" required></textarea>
       </div>
       <div class="mb-2">
-        <input  v-model="customer.phone" class="form-control" placeholder="เบอร์โทร" required />
-      </div>
-      <div class="mb-2">
-        <input v-model="customer.username" class="form-control" placeholder="ชื่อผู้ใช้" required />
-      </div>
-      <div class="mb-2">
-        <input type="password" v-model="customer.password" class="form-control" placeholder="รหัสผ่าน" required />
+        <input type="email" v-model="contact.email" class="form-control" placeholder="อีเมล" required />
       </div>
       <div class="text-center mt-4 ">
       <button type="submit" class="btn btn-primary mb-4">บันทึก</button> &nbsp;
@@ -34,12 +28,10 @@
 export default {
   data() {
     return {
-      customer: {
-        firstName: "",
-        lastName: "",
-        phone: "",
-        username: "",
-        password: ""
+      contact: {
+        subject: "",
+        detail: "",
+        email: ""
       },
       message: ""
     };
@@ -47,17 +39,17 @@ export default {
   methods: {
     async addData() {
       try {
-        const res = await fetch("http://localhost/dbshop/php_api/addcustomer.php", {
+        const res = await fetch("http://localhost/dbshop/php_api/Addcontacts.php", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(this.customer)
+          body: JSON.stringify(this.contact)
         });
         const data = await res.json();
         this.message = data.message;
 
         if (data.success) {
           // ✅ เคลียร์ข้อมูลใน textbox หลังบันทึกสำเร็จ
-          this.customer = { firstName: "", lastName: "", phone: "", username: "", password: "" };
+          this.contact = { subject: "", detail: "", email: "" };
         }
 
       } catch (err) {
