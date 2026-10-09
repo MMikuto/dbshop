@@ -1,109 +1,216 @@
 <template>
   <div class="container mt-4">
-    <!-- หัวข้อหน้า -->
-    <h2 class="mb-3">รายชื่อลูกค้า</h2>
-    
-    <!-- ตารางแสดงข้อมูล Contacts -->
-    <div class="text-end mb-3">
-    <a href="/AC" class="btn btn-primary">Add+</a>
+    <h2 class="mb-3">รายการข้อความติดต่อ</h2>
+
+    <div class="mb-3">
+      <button class="btn btn-primary" type="button" @click="openAddModal">
+        Add+ <i class="bi bi-plus-circle"></i>
+      </button>
     </div>
 
-    <table class="table table-bordered table-striped">
-      <thead class="table-dark">
-        <tr>
-          <th>ลำดับที่</th>        <!-- index -->
-          <th>รหัส Contact</th>
-          <th>หัวข้อ</th>
-          <th>รายละเอียด</th>
-          <th>อีเมล</th>
-          <th>วันที่สร้าง</th>
-        </tr>
-      </thead>
+    <div v-if="loading" class="text-center"><p>กำลังโหลดข้อมูล...</p></div>
+    <div v-if="error" class="alert alert-danger">{{ error }}</div>
+    <div v-if="message" class="alert alert-success">{{ message }}</div>
 
-      <tbody>
-        <!-- วนลูปข้อมูล customers -->
-        <tr v-for="(item,index) in contacts" :key="item.contact_id">
-          <td>{{ index + 1 }}</td>       <!-- แสดงลำดับที่ (เริ่มจาก 1) -->
-          <td>{{ item.contact_id }}</td>
-          <td>{{ item.subject }}</td>
-          <td>{{ item.detail }}</td>
-          <td>{{ item.email }}</td>
-          <td>{{ item.created_at }}</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Loading: แสดงระหว่างรอข้อมูล -->
-    <div v-if="loading" class="text-center">
-      <p>กำลังโหลดข้อมูล...</p>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped">
+        <thead class="table-primary">
+          <tr>
+            <th>ID</th>
+            <th>หัวข้อ</th>
+            <th>รายละเอียด</th>
+            <th>อีเมล</th>
+            <th>วันที่สร้าง</th>
+            <th>แก้ไข/ลบ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="contact in contacts" :key="contact.contact_id">
+            <td>{{ contact.contact_id }}</td>
+            <td>{{ contact.subject }}</td>
+            <td class="text-break">{{ contact.detail }}</td>
+            <td>{{ contact.email }}</td>
+            <td>{{ contact.created_at }}</td>
+            <td class="text-nowrap">
+              <button class="btn btn-warning btn-sm" type="button" @click="openEditModal(contact)">
+                แก้ไข
+              </button>
+              |
+              <button
+                class="btn btn-danger btn-sm"
+                type="button"
+                :disabled="deletingId === contact.contact_id"
+                @click="deleteContact(contact)"
+              >
+                {{ deletingId === contact.contact_id ? "กำลังลบ..." : "ลบ" }}
+              </button>
+            </td>
+          </tr>
+          <tr v-if="!loading && contacts.length === 0">
+            <td colspan="6" class="text-center">ยังไม่มีข้อความติดต่อ</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- Error: แสดงเมื่อเกิดข้อผิดพลาด -->
-    <div v-if="error" class="alert alert-danger">
-      {{ error }}
+    <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalTitle" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 id="contactModalTitle" class="modal-title">
+              {{ isEditMode ? "แก้ไขข้อความติดต่อ" : "เพิ่มข้อความติดต่อ" }}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="saveContact">
+              <div class="mb-3">
+                <label for="contact-subject" class="form-label">หัวข้อ</label>
+                <input id="contact-subject" v-model.trim="editContact.subject" type="text" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label for="contact-detail" class="form-label">รายละเอียด</label>
+                <textarea id="contact-detail" v-model.trim="editContact.detail" class="form-control" rows="4" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="contact-email" class="form-label">อีเมล</label>
+                <input id="contact-email" v-model.trim="editContact.email" type="email" class="form-control" required>
+              </div>
+              <button type="submit" class="btn btn-success" :disabled="saving">
+                {{ saving ? "กำลังบันทึก..." : (isEditMode ? "บันทึกการแก้ไข" : "เพิ่มข้อความติดต่อ") }}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-// import ฟังก์ชันจาก Vue (Composition API)
-import { ref, onMounted } from "vue";
+import { onMounted, ref } from "vue";
+import { Modal } from "bootstrap";
+
+const apiUrl = "http://localhost/dbshop/php_api/show_contacts.php";
 
 export default {
-  name: "CustomerList", // ชื่อ component
-
+  name: "ContactList",
   setup() {
-    // -----------------------------
-    // state (ตัวแปร reactive)
-    // -----------------------------
-    const contacts = ref([]); // เก็บข้อมูล Contacts
-    const loading = ref(true); // สถานะโหลดข้อมูล
-    const error = ref(null);   // เก็บ error
+    const contacts = ref([]);
+    const loading = ref(true);
+    const saving = ref(false);
+    const deletingId = ref(null);
+    const error = ref("");
+    const message = ref("");
+    const editContact = ref({});
+    const isEditMode = ref(false);
+    let contactModal = null;
 
-    // -----------------------------
-    // ฟังก์ชันดึงข้อมูลจาก API
-    // -----------------------------
-    const fetchdata = async () => {
+    const fetchContacts = async () => {
+      loading.value = true;
+      error.value = "";
       try {
-        // เรียก API (PHP)
-        const response = await fetch("http://localhost/dbshop/php_api/show_contacts.php");
-
-        // ตรวจสอบว่าการเรียกสำเร็จหรือไม่
+        const response = await fetch(apiUrl);
         if (!response.ok) {
-          throw new Error("ไม่สามารถดึงข้อมูลได้");
+          throw new Error(`โหลดข้อความติดต่อไม่สำเร็จ (HTTP ${response.status})`);
         }
-
-        // แปลง response เป็น JSON
         const data = await response.json();
         if (!Array.isArray(data)) {
-          throw new Error(data.error || "รูปแบบข้อมูลไม่ถูกต้อง");
+          throw new Error(data.error || "รูปแบบข้อมูลข้อความติดต่อไม่ถูกต้อง");
         }
         contacts.value = data;
-
       } catch (err) {
-        // ถ้า error ให้เก็บข้อความไว้แสดง
-        error.value = err.message;
-
+        error.value = err.message || "เกิดข้อผิดพลาดขณะโหลดข้อความติดต่อ";
       } finally {
-        // ไม่ว่าจะสำเร็จหรือ error ให้หยุด loading
         loading.value = false;
       }
     };
 
-    // -----------------------------
-    // lifecycle: ทำงานเมื่อ component โหลดเสร็จ
-    // -----------------------------
     onMounted(() => {
-      fetchdata(); // เรียก API ทันที
+      fetchContacts();
+      const modalElement = document.getElementById("contactModal");
+      if (modalElement) {
+        contactModal = new Modal(modalElement);
+      }
     });
 
-    // -----------------------------
-    // return ค่าไปใช้ใน template
-    // -----------------------------
+    const openAddModal = () => {
+      isEditMode.value = false;
+      editContact.value = { subject: "", detail: "", email: "" };
+      contactModal?.show();
+    };
+
+    const openEditModal = (contact) => {
+      isEditMode.value = true;
+      editContact.value = { ...contact };
+      contactModal?.show();
+    };
+
+    const saveContact = async () => {
+      saving.value = true;
+      error.value = "";
+      message.value = "";
+      try {
+        const response = await fetch(apiUrl, {
+          method: isEditMode.value ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editContact.value)
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || "ไม่สามารถบันทึกข้อความติดต่อได้");
+        }
+        message.value = result.message;
+        contactModal?.hide();
+        await fetchContacts();
+      } catch (err) {
+        error.value = err.message || "เกิดข้อผิดพลาดขณะบันทึกข้อความติดต่อ";
+      } finally {
+        saving.value = false;
+      }
+    };
+
+    const deleteContact = async (contact) => {
+      if (!window.confirm(`ต้องการลบข้อความ "${contact.subject}" หรือไม่?`)) {
+        return;
+      }
+      deletingId.value = contact.contact_id;
+      error.value = "";
+      message.value = "";
+      try {
+        const response = await fetch(apiUrl, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contact_id: contact.contact_id })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || "ไม่สามารถลบข้อความติดต่อได้");
+        }
+        contacts.value = contacts.value.filter(
+          (item) => Number(item.contact_id) !== Number(contact.contact_id)
+        );
+        message.value = result.message;
+      } catch (err) {
+        error.value = err.message || "เกิดข้อผิดพลาดขณะลบข้อความติดต่อ";
+      } finally {
+        deletingId.value = null;
+      }
+    };
+
     return {
       contacts,
       loading,
-      error
+      saving,
+      deletingId,
+      error,
+      message,
+      editContact,
+      isEditMode,
+      openAddModal,
+      openEditModal,
+      saveContact,
+      deleteContact
     };
   }
 };

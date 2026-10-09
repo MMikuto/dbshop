@@ -16,27 +16,34 @@
             <router-link class="nav-link" to="/">Home</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" to="#">Show Product</router-link>
+            <router-link class="nav-link" to="/ACC">Customer_crud</router-link>
           </li>
            <li class="nav-item">
             <router-link class="nav-link" to="/customers">Customers</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" to="/employee">Employee</router-link>
           </li>
           <li class="nav-item">
             <router-link class="nav-link" to="/contacts">Contacts</router-link>
           </li>
            <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            contacts
+            Register
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/AC">Contact</a></li>
-            <li><a class="dropdown-item" href="#">Login</a></li>
+            <li><a class="dropdown-item" href="/ACC">Customer_crud</a></li>
+            <li><a class="dropdown-item" href="/contacts">Contacts</a></li>
             <li><a class="dropdown-item" href="#">Logout</a></li>
           </ul>
+          <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Employee
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/employee">Employee</a></li>
+            <li><a class="dropdown-item" href="/EC">Employees_crud</a></li>
+          </ul>
         </li>
+        </li>
+        
            <li class="nav-item">
             <router-link class="nav-link" to="/about">About</router-link>
           </li>

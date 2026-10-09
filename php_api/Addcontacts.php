@@ -1,4 +1,13 @@
 <?php
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
 
 include 'condb.php';
 
@@ -9,6 +18,7 @@ if (
     !isset($data['detail']) ||
     !isset($data['email'])
 ) {
+    http_response_code(400);
     echo json_encode([
         "success" => false,
         "message" => "ข้อมูลไม่ครบ"
@@ -35,8 +45,9 @@ try {
     ]);
 
 } catch (PDOException $e) {
+    http_response_code(500);
     echo json_encode([
         "success" => false,
-        "message" => $e->getMessage()
+        "message" => "ไม่สามารถเพิ่มข้อมูลติดต่อได้"
     ]);
 }

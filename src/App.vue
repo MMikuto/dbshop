@@ -6,7 +6,7 @@
 
   <router-view/>
 
-  <footer />
+  <FooterComponent />
   
   </div>
   
@@ -16,9 +16,9 @@
 
 <script>
 import Navbar from "./components/Navbar.vue";
-import footer from "./components/footer.vue";
+import FooterComponent from "./components/footer.vue";
 export default {
   name: "App",
-  components: { Navbar,footer }
+  components: { Navbar, FooterComponent }
 };
 </script>
