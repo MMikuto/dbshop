@@ -55,11 +55,23 @@ const routes = [
    
     component: () => import(/* webpackChunkName: "about" */ '../views/Customer_crud.vue')
   },
-    {
+  {
     path: '/EC',
     name: 'Employees_crud',
    
     component: () => import(/* webpackChunkName: "about" */ '../views/Employees_crud.vue')
+  },
+  {
+    path: '/pro',
+    name: 'api_Product',
+   
+    component: () => import(/* webpackChunkName: "about" */ '../views/product_edit.vue')
+  },
+   {
+    path: '/AS',
+    name: 'api_asset',
+   
+    component: () => import(/* webpackChunkName: "about" */ '../views/asset_edit.vue')
   },
 ]
 

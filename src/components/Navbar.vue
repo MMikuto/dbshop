@@ -24,6 +24,12 @@
           <li class="nav-item">
             <router-link class="nav-link" to="/contacts">Contacts</router-link>
           </li>
+          <li class="nav-item">
+            <router-link class="nav-link" to="/pro">Product</router-link>
+          </li>
+          <li class="nav-item">
+            <router-link class="nav-link" to="/AS">Asset</router-link>
+          </li>
            <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Register
@@ -43,6 +49,7 @@
           </ul>
         </li>
         </li>
+        
         
            <li class="nav-item">
             <router-link class="nav-link" to="/about">About</router-link>

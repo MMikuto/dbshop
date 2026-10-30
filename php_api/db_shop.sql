@@ -1,0 +1,29 @@
+CREATE DATABASE IF NOT EXISTS db_shop
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE db_shop;
+
+CREATE TABLE IF NOT EXISTS contacts (
+  contact_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  subject VARCHAR(255) NOT NULL,
+  detail TEXT NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (contact_id)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS assets (
+  asset_id INT NOT NULL AUTO_INCREMENT,
+  asset_code VARCHAR(50) NOT NULL,
+  asset_name VARCHAR(255) NOT NULL,
+  purchase_date DATE NULL,
+  price DECIMAL(10,2) NULL,
+  image VARCHAR(100) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (asset_id)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
