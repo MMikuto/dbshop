@@ -6,6 +6,9 @@
       <button class="btn btn-primary" @click="openAddModal">Add+</button>
     </div>
 
+    <div v-if="loading" class="text-center"><p>กำลังโหลดข้อมูล...</p></div>
+    <div v-if="error" class="alert alert-danger">{{ error }}</div>
+
     <table class="table table-bordered table-striped">
       <thead class="table-primary">
         <tr>
@@ -41,11 +44,11 @@
             </button>
           </td>
         </tr>
+        <tr v-if="!loading && !error && products.length === 0">
+          <td colspan="7" class="text-center">ยังไม่มีข้อมูลสินค้า</td>
+        </tr>
       </tbody>
     </table>
-
-    <div v-if="loading" class="text-center"><p>กำลังโหลดข้อมูล...</p></div>
-    <div v-if="error" class="alert alert-danger">{{ error }}</div>
 
     <!-- Modal ใช้ทั้งเพิ่ม / แก้ไข -->
     <div class="modal fade" id="editModal" tabindex="-1">
@@ -110,6 +113,8 @@
 <script>
 import { ref, onMounted } from "vue";
 
+const apiUrl = `${window.location.protocol}//${window.location.hostname}/dbshop/php_api/api_product.php`;
+
 export default {
   name: "ProductList",
   setup() {
@@ -130,12 +135,18 @@ export default {
 
     // โหลดข้อมูลสินค้า
     const fetchProducts = async () => {
+      loading.value = true;
+      error.value = null;
       try {
-        const res = await fetch("http://localhost/dbshop/php_api/api_product.php");
+        const res = await fetch(apiUrl);
         const data = await res.json();
-        products.value = data.success ? data.data : [];
+        if (!res.ok || !data.success || !Array.isArray(data.data)) {
+          throw new Error(data.message || "โหลดข้อมูลสินค้าไม่สำเร็จ");
+        }
+        products.value = data.data;
       } catch (err) {
-        error.value = err.message;
+        products.value = [];
+        error.value = err.message || "เกิดข้อผิดพลาดขณะโหลดข้อมูลสินค้า";
       } finally {
         loading.value = false;
       }

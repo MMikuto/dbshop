@@ -1,6 +1,6 @@
 <template>
   <div class="container mt-4">
-    <h2 class="mb-3">รายการครุภัณฑ์</h2>
+    <h2 class="mb-3">รายการสินค้า</h2>
 
     <div class="mb-3">
       <button class="btn btn-primary" type="button" @click="openAddModal">
@@ -58,7 +58,7 @@
             </td>
           </tr>
           <tr v-if="!loading && assets.length === 0">
-            <td colspan="7" class="text-center">ยังไม่มีข้อมูลครุภัณฑ์</td>
+            <td colspan="7" class="text-center">ยังไม่มีข้อมูลสินค้า</td>
           </tr>
         </tbody>
       </table>
@@ -75,14 +75,14 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 id="assetModalTitle" class="modal-title">
-              {{ isEditMode ? "แก้ไขครุภัณฑ์" : "เพิ่มครุภัณฑ์" }}
+              {{ isEditMode ? "แก้ไขสินค้า" : "เพิ่มสินค้า" }}
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
           </div>
           <div class="modal-body">
             <form @submit.prevent="saveAsset">
               <div class="mb-3">
-                <label for="asset-code" class="form-label">รหัสครุภัณฑ์</label>
+                <label for="asset-code" class="form-label">รหัสสินค้า</label>
                 <input
                   id="asset-code"
                   v-model.trim="editForm.asset_code"
@@ -93,7 +93,7 @@
                 />
               </div>
               <div class="mb-3">
-                <label for="asset-name" class="form-label">ชื่อครุภัณฑ์</label>
+                <label for="asset-name" class="form-label">ชื่อสินค้า</label>
                 <input
                   id="asset-name"
                   v-model.trim="editForm.asset_name"
@@ -138,7 +138,7 @@
                 />
               </div>
               <button type="submit" class="btn btn-success" :disabled="saving">
-                {{ saving ? "กำลังบันทึก..." : (isEditMode ? "บันทึกการแก้ไข" : "เพิ่มครุภัณฑ์") }}
+                {{ saving ? "กำลังบันทึก..." : (isEditMode ? "บันทึกการแก้ไข" : "เพิ่มสินค้า") }}
               </button>
             </form>
           </div>
@@ -152,8 +152,8 @@
 import { onMounted, ref } from "vue";
 import { Modal } from "bootstrap";
 
-const apiUrl = "http://localhost/dbshop/php_api/api_asset.php";
-const apiBaseUrl = "http://localhost/dbshop/php_api/";
+const apiBaseUrl = `${window.location.protocol}//${window.location.hostname}/dbshop/php_api/`;
+const apiUrl = `${apiBaseUrl}api_asset.php`;
 
 export default {
   name: "AssetList",
@@ -187,11 +187,11 @@ export default {
         const response = await fetch(apiUrl);
         const result = await response.json();
         if (!response.ok || !result.success || !Array.isArray(result.data)) {
-          throw new Error(result.message || "โหลดข้อมูลครุภัณฑ์ไม่สำเร็จ");
+          throw new Error(result.message || "โหลดข้อมูลสินค้าไม่สำเร็จ");
         }
         assets.value = result.data;
       } catch (err) {
-        error.value = err.message || "เกิดข้อผิดพลาดขณะโหลดข้อมูลครุภัณฑ์";
+        error.value = err.message || "เกิดข้อผิดพลาดขณะโหลดข้อมูลสินค้า";
       } finally {
         loading.value = false;
       }
@@ -247,20 +247,20 @@ export default {
         const response = await fetch(apiUrl, { method: "POST", body: formData });
         const result = await response.json();
         if (!response.ok || !result.success) {
-          throw new Error(result.message || "บันทึกข้อมูลครุภัณฑ์ไม่สำเร็จ");
+          throw new Error(result.message || "บันทึกข้อมูลสินค้าไม่สำเร็จ");
         }
         message.value = result.message;
         assetModal?.hide();
         await fetchAssets();
       } catch (err) {
-        error.value = err.message || "เกิดข้อผิดพลาดขณะบันทึกข้อมูลครุภัณฑ์";
+        error.value = err.message || "เกิดข้อผิดพลาดขณะบันทึกข้อมูลสินค้า";
       } finally {
         saving.value = false;
       }
     };
 
     const deleteAsset = async (asset) => {
-      if (!window.confirm(`ต้องการลบครุภัณฑ์ "${asset.asset_name}" หรือไม่?`)) return;
+      if (!window.confirm(`ต้องการลบสินค้า "${asset.asset_name}" หรือไม่?`)) return;
 
       deletingId.value = asset.asset_id;
       error.value = "";
@@ -273,12 +273,12 @@ export default {
         const response = await fetch(apiUrl, { method: "POST", body: formData });
         const result = await response.json();
         if (!response.ok || !result.success) {
-          throw new Error(result.message || "ลบข้อมูลครุภัณฑ์ไม่สำเร็จ");
+          throw new Error(result.message || "ลบข้อมูลสินค้าไม่สำเร็จ");
         }
         assets.value = assets.value.filter((item) => Number(item.asset_id) !== Number(asset.asset_id));
         message.value = result.message;
       } catch (err) {
-        error.value = err.message || "เกิดข้อผิดพลาดขณะลบข้อมูลครุภัณฑ์";
+        error.value = err.message || "เกิดข้อผิดพลาดขณะลบข้อมูลสินค้า";
       } finally {
         deletingId.value = null;
       }
